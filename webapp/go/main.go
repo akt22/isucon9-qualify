@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -21,6 +22,8 @@ import (
 	goji "goji.io"
 	"goji.io/pat"
 	"golang.org/x/crypto/bcrypt"
+
+	_ "net/http/pprof"
 )
 
 const (
@@ -293,7 +296,8 @@ func main() {
 	}
 	user := os.Getenv("MYSQL_USER")
 	if user == "" {
-		user = "isucari"
+		//user = "isucari"
+		user = "root"
 	}
 	dbname := os.Getenv("MYSQL_DBNAME")
 	if dbname == "" {
@@ -301,7 +305,8 @@ func main() {
 	}
 	password := os.Getenv("MYSQL_PASS")
 	if password == "" {
-		password = "isucari"
+		//password = "isucari"
+		password = "password"
 	}
 
 	dsn := fmt.Sprintf(
@@ -318,6 +323,12 @@ func main() {
 		log.Fatalf("failed to connect to DB: %s.", err.Error())
 	}
 	defer dbx.Close()
+
+	runtime.SetBlockProfileRate(1)
+	// pprof endpoint
+	go func() {
+		log.Println(http.ListenAndServe(":6060", nil))
+	}()
 
 	mux := goji.NewMux()
 
@@ -356,7 +367,7 @@ func main() {
 	mux.HandleFunc(pat.Get("/users/setting"), getIndex)
 	// Assets
 	mux.Handle(pat.Get("/*"), http.FileServer(http.Dir("../public")))
-	log.Fatal(http.ListenAndServe(":8000", mux))
+	log.Println(http.ListenAndServe(":8000", mux))
 }
 
 func getSession(r *http.Request) *sessions.Session {
