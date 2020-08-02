@@ -332,7 +332,6 @@ func main() {
 
 	mux := goji.NewMux()
 
-	testtest
 
 	// API
 	mux.HandleFunc(pat.Post("/initialize"), postInitialize)
