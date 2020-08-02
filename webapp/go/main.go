@@ -332,6 +332,8 @@ func main() {
 
 	mux := goji.NewMux()
 
+	haogeafjafa
+
 	// API
 	mux.HandleFunc(pat.Post("/initialize"), postInitialize)
 	mux.HandleFunc(pat.Get("/new_items.json"), getNewItems)
